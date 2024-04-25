@@ -1,0 +1,12 @@
+{
+    "recommendations": [
+        "steoates.autoimport",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "prisma.prisma",
+        "amazonwebservices.aws-toolkit-vscode",
+        "bierner.github-markdown-preview",
+        "github.vscode-pull-request-github",
+        "mhutchie.git-graph"
+    ]
+}
