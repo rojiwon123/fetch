@@ -11,7 +11,9 @@ export interface IQueryOptions extends IOptions {
     query?: IQuery;
 }
 
-export interface IJsonBodyOptions<T extends object> extends IOptions {
+export interface IJsonBodyOptions<
+    T extends object | string | number | boolean | null | undefined,
+> extends IOptions {
     body: T;
     stringify?: (input: T) => string;
 }

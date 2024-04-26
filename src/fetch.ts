@@ -64,7 +64,9 @@ const _delete = base({ method: "DELETE" });
 
 const json =
     (method: "POST" | "PATCH" | "PUT") =>
-    <T extends object>(options: IJsonBodyOptions<T>) =>
+    <T extends object | string | number | boolean | null>(
+        options: IJsonBodyOptions<T>,
+    ) =>
         base({
             body: (options.stringify ?? JSON.stringify)(options.body),
             method,
