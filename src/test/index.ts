@@ -15,7 +15,7 @@ app.use(
     // bodyParser.raw(),
     bodyParser.text(),
     bodyParser.urlencoded({ extended: true }),
-    bodyParser.json(),
+    bodyParser.json({ strict: false }),
 );
 
 app.get("/", (req, res) => {

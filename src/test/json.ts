@@ -1,8 +1,7 @@
 import assert from "assert";
 import express from "express";
 
-import fetch from "..";
-import { created } from "./util";
+import fetch, { IResponse } from "..";
 
 const base = "http://localhost:4000/json";
 
@@ -22,37 +21,48 @@ const json_body = {
         list: [123, "test", null, true, undefined],
     },
 } as const;
-const json_expected = {
-    test: "test",
-    num: 123,
-    bol: true,
-    nul: null,
-    list: [123, "test", null, true, null],
-    nested: {
-        test: "test",
-        num: 123,
-        bol: true,
-        nul: null,
-        list: [123, "test", null, true, null],
-    },
-} as const;
 
-const json = (path: string, body: object) =>
-    fetch.method.post.json({ url: base + path, body });
+const json = async (
+    path: string,
+    body: object,
+    validate: (response: IResponse) => Promise<void> | void,
+) => fetch.method.post.json({ url: base + path, body }).then(validate);
 
-const json_request_with_json_body = () => created(json("/json", json_body));
+const json_request_with_json_body = () =>
+    json("/json", json_body, (res) => assert.strictEqual(res.status, 201));
 
 const json_request_with_text_body = () =>
-    created(json("/str", "atomic test" as any));
-const json_request_with_number_body = () => created(json("/num", 123 as any));
+    json("/str", "atomic test" as any, (res) => {
+        assert.strictEqual(res.status, 400);
+        assert.strictEqual(
+            res.headers.get("content-type"),
+            "text/html; charset=utf-8",
+        );
+    });
+const json_request_with_number_body = () =>
+    json("/num", 123 as any, (res) => {
+        assert.strictEqual(res.status, 400);
+        assert.strictEqual(
+            res.headers.get("content-type"),
+            "text/html; charset=utf-8",
+        );
+    });
 const json_request_with_boolean_body = () =>
-    created(json("/bool", true as any));
+    json("/bool", true as any, (res) => {
+        assert.strictEqual(res.status, 400);
+        assert.strictEqual(
+            res.headers.get("content-type"),
+            "text/html; charset=utf-8",
+        );
+    });
 const json_request_with_list_body = () =>
-    created(json("/list", [123, 2, 3, "4", undefined]));
+    json("/list", [123, 2, 3, "4", undefined], (res) =>
+        assert.strictEqual(res.status, 201),
+    );
 
 export const json_router = express.Router();
 
-export const json_tests = [
+export const json_tests: (() => Promise<void>)[] = [
     json_request_with_json_body,
     json_request_with_text_body,
     json_request_with_number_body,
@@ -78,21 +88,15 @@ json_router.post("/json", (req, res) => {
     res.status(201).end();
 });
 
-json_router.post("/str", (req, res) => {
-    console.log(req.body);
-    assert.deepStrictEqual(req.body, json_expected);
+json_router.post("/str", (_, res) => {
     res.status(201).end();
 });
 
-json_router.post("/num", (req, res) => {
-    console.log(req.body);
-    assert.deepStrictEqual(req.body, json_expected);
+json_router.post("/num", (_, res) => {
     res.status(201).end();
 });
 
-json_router.post("/bool", (req, res) => {
-    console.log(req.body);
-    assert.deepStrictEqual(req.body, json_expected);
+json_router.post("/bool", (_, res) => {
     res.status(201).end();
 });
 
