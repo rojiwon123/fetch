@@ -14,15 +14,21 @@ const is_query_value = (input: unknown): input is QueryValue => {
 /**
  * @internal
  */
-export const parseQuery = (input?: object): [string, string][] => {
-    const query: [string, string][] = [];
-    if (typeof input !== "object" || input === null) return query;
-    for (const [key, value] of Object.entries(input))
-        if (Array.isArray(value)) {
-            for (const item of value)
-                if (is_query_value(item))
-                    query.push([key, item?.toString() ?? "null"]);
-        } else if (is_query_value(value))
-            query.push([key, value?.toString() ?? "null"]);
-    return query;
+export const parseQueryValueList = (
+    query: IQuery | undefined,
+): [string, string][] => {
+    const list: [string, string][] = [];
+    if (typeof query !== "object" || query === null) return list;
+    Object.entries(query).forEach(([key, value]) =>
+        Array.isArray(value)
+            ? value.forEach((item) =>
+                  is_query_value(item)
+                      ? list.push([key, item?.toString() ?? "null"])
+                      : null,
+              )
+            : is_query_value(value)
+              ? list.push([key, value?.toString() ?? "null"])
+              : null,
+    );
+    return list;
 };

@@ -1,7 +1,7 @@
 import assert from "assert";
 import express from "express";
 
-import { fetch } from "../fetch";
+import fetch from "..";
 import { created } from "./util";
 
 const base = "http://localhost:4000/content-type";
@@ -37,43 +37,27 @@ const json_expected = {
     },
 } as const;
 
-const test_json_with_no_content_type = () =>
-    created(fetch({ url: base + "/json", method: "POST", body: json_body }));
-
-const test_json_with_json_type = () =>
-    created(
-        fetch({
-            url: base + "/json",
-            method: "POST",
-            body: json_body,
-            format: "json",
-        }),
-    );
-
 const test_json_with_text_type = () =>
     created(
-        fetch({
+        fetch.method.post.text({
             url: base + "/text",
-            method: "POST",
-            body: json_body,
-            format: "text",
+            body: json_body as any,
         }),
     );
 
+/**
+ * IQuery 형식에 맞지 않는 데이터를 포함
+ */
 const test_json_with_urlencoded_type = () =>
     created(
-        fetch({
+        fetch.method.post.urlencoded({
             url: base + "/urlencoded",
-            method: "POST",
-            body: json_body,
-            format: "urlencoded",
+            body: json_body as any,
         }),
     );
 
 export const content_type_router = express.Router();
 export const content_type_tests = [
-    test_json_with_no_content_type,
-    test_json_with_json_type,
     test_json_with_text_type,
     test_json_with_urlencoded_type,
 ];

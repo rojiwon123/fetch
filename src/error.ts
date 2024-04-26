@@ -1,15 +1,12 @@
-export class FetchError extends Error {
+export class FetchException extends Error {
     constructor(
-        override readonly message: string,
-        cause?: unknown,
+        public override readonly message:
+            | "Invalid Body"
+            | "Invalid URL"
+            | "Fetch API Error",
+        ...cause: unknown[]
     ) {
-        if (cause !== undefined) super(message, { cause });
-        super(message);
-    }
-
-    static throw(message: string) {
-        return (err: unknown) => {
-            throw new FetchError(message, err);
-        };
+        if (cause.length === 0) super(message);
+        else super(message, { cause });
     }
 }

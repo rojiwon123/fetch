@@ -2,7 +2,10 @@
     "typescript.tsdk": "node_modules/typescript/lib",
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "typescript.preferences.autoImportFileExcludePatterns": ["./lib/**"],
+    "typescript.preferences.autoImportFileExcludePatterns": [
+        "./tbuild/**",
+        "./lib/**"
+    ],
     "typescript.inlayHints.functionLikeReturnTypes.enabled": true,
     "typescript.inlayHints.parameterTypes.enabled": true
 }

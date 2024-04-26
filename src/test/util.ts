@@ -1,4 +1,4 @@
-import { IResponse } from "../fetch";
+import { IResponse } from "../response";
 
 export const expect =
     (status: number) => async (response: Promise<IResponse>) => {

@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import test from "node:test";
 
-import { content_type_router, content_type_tests } from "./content_type";
+import { json_router, json_tests } from "./json";
 import { test_fetch } from "./test_fetch";
 
 const app = express();
@@ -23,14 +23,14 @@ app.get("/", (req, res) => {
     res.json(123);
 });
 
-app.use("/content-type", content_type_router);
+app.use("/json", json_router);
 
 const server = app.listen(4000);
 
 const execute = (...fns: (() => Promise<void>)[]) =>
     Promise.all(fns.map((fn) => test(fn.name, fn)));
 
-void execute(test_fetch, ...content_type_tests).finally(() =>
+void execute(test_fetch, ...json_tests).finally(() =>
     server.close((err) => {
         if (err) console.log(err);
     }),
