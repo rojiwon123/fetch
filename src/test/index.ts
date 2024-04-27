@@ -1,11 +1,11 @@
-import assert from "assert";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import express from "express";
 import test from "node:test";
 
-import { json_router, json_tests } from "./json";
-import { test_fetch } from "./test_fetch";
+import fetch from "..";
+import { describe_json } from "./json";
+import { describe_text } from "./text";
 
 const app = express();
 
@@ -18,20 +18,22 @@ app.use(
     bodyParser.json({ strict: false }),
 );
 
-app.get("/", (req, res) => {
-    assert.deepStrictEqual(req.body, {});
-    res.json(123);
-});
-
-app.use("/json", json_router);
+app.get("/", (_, res) => res.end());
+app.post("/json", (req, res) => res.status(201).json(req.body));
+app.post("/text", (req, res) => res.status(201).json(req.body));
 
 const server = app.listen(4000);
 
-const execute = (...fns: (() => Promise<void>)[]) =>
-    Promise.all(fns.map((fn) => test(fn.name, fn)));
+const host = "http://localhost:4000";
 
-void execute(test_fetch, ...json_tests).finally(() =>
-    server.close((err) => {
-        if (err) console.log(err);
-    }),
-);
+const start = (url: string) =>
+    test
+        .it("test start", { concurrency: true }, () =>
+            fetch.method.get({ url }).then(() => {}),
+        )
+        .then(() => url);
+
+const end = () =>
+    server.close((err: unknown) => (err ? console.error(err) : null));
+
+void start(host).then(describe_json).then(describe_text).finally(end);
