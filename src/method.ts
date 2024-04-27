@@ -1,4 +1,4 @@
-import { FetchException } from "./error";
+import { FetchError } from "./error";
 import { IFormData } from "./formdata";
 import { parseHeaders } from "./headers";
 import { internal_fetch } from "./internal_fetch";
@@ -19,12 +19,12 @@ const get_url = (url: string): URL => {
         const _url = new URL(url);
         return _url;
     } catch (error) {
-        throw new FetchException("Invalid URL", error);
+        throw new FetchError("Invalid URL", error);
     }
 };
 
 const FetchErrorWrapper = (...errors: unknown[]) => {
-    throw new FetchException("Fetch API Error", ...errors);
+    throw new FetchError("Fetch API Error", ...errors);
 };
 
 const base =

@@ -36,4 +36,8 @@ const start = (url: string) =>
 const end = () =>
     server.close((err: unknown) => (err ? console.error(err) : null));
 
-void start(host).then(describe_json).then(describe_text).finally(end);
+void start(host)
+    .then(describe_json)
+    .then(describe_text)
+
+    .finally(end);
