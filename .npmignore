@@ -1,0 +1,14 @@
+.github
+.husky
+.vscode
+node_modules
+src
+tbuild
+.eslintrc.json
+.gitignore
+.npmignore
+.prettierignore
+prettier.config.cjs
+tsconfig.build.json
+tsconfig.json
+tsconfig.test.json

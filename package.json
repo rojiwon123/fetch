@@ -7,8 +7,15 @@
         "build": "rimraf ./lib && tsc -p ./tsconfig.build.json",
         "test": "rimraf ./tbuild && tsc -p ./tsconfig.test.json && node ./tbuild/test"
     },
-    "author": "",
-    "license": "ISC",
+    "keywords": [
+        "fetch"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rojiwon123/fetch.git"
+    },
+    "author": "rojiwon123",
+    "license": "MIT",
     "devDependencies": {
         "@trivago/prettier-plugin-sort-imports": "^4.3.0",
         "@types/body-parser": "^1.19.5",

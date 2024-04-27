@@ -1,0 +1,86 @@
+name: Release 🔖
+
+on:
+    workflow_dispatch:
+        inputs:
+            suffix:
+                description: "Suffix to Append to Tag Names"
+                required: false
+                type: string
+
+permissions:
+    id-token: write
+    contents: write
+    packages: read
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@main
+
+            - name: Setup NodeJS
+              uses: actions/setup-node@main
+              with:
+                  node-version: 20
+
+            - name: Install
+              run: npm ci
+
+            - name: Test 🧪
+              run: npm run test
+
+    create-release-note:
+        runs-on: ubuntu-latest
+        needs: test
+
+        outputs:
+            release: ${{ steps.tag-name.outputs.TAG_NAME }}
+
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@main
+
+            - name: Generate Release Tag 🔧
+              id: tag-name
+              run: |
+                  VERSION=$(node -p "require('./package.json').version")
+                  if [ -n "${{ github.event.inputs.suffix }}" ]; then
+                    tag_name="v${VERSION}-${{ github.event.inputs.suffix }}"
+                  else
+                    tag_name="v${VERSION}"
+                  fi
+                    echo "TAG_NAME=$tag_name" >> $GITHUB_OUTPUT
+              shell: bash
+
+            - name: Create Release Note 🔖
+              run: |
+                  git config --global user.email "github-actions@github.com"
+                  git config --global user.name "GitHub Actions"
+                  git tag -a "${{ steps.tag-name.outputs.TAG_NAME }}" -m "${{ steps.tag-name.outputs.TAG_NAME }}"
+                  git push origin "${{ steps.tag-name.outputs.TAG_NAME }}"
+                  gh release create "${{ steps.tag-name.outputs.TAG_NAME }}" -t "${{ steps.tag-name.outputs.TAG_NAME }}" --target "${{ github.sha }}" --generate-notes
+
+    publish:
+        runs-on: ubuntu-latest
+        needs: create-release-note
+
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@main
+
+            - name: Setup NodeJS
+              uses: actions/setup-node@main
+              with:
+                  node-version: 20
+                  registry-url: "https://npm.pkg.github.com"
+                  scope: "@rojiwon123"
+
+            - name: Build
+              run: npm ci && npm run build
+
+            - name: Publish
+              run: npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
