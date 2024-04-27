@@ -32,17 +32,17 @@ const base =
         path = (i) => i,
         body = null,
         method,
-        format,
+        content_type,
     }: {
         path?: (url: URL) => URL;
         body?: string | Uint8Array | Blob | FormData | URLSearchParams | null;
         method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
-        format?: string;
+        content_type?: string;
     }) =>
     async (options: IOptions): Promise<IResponse> => {
         const url = path(get_url(options.url));
         const headers = parseHeaders(options.headers);
-        if (format) headers.set("content-type", format);
+        if (content_type) headers.set("content-type", content_type);
         return internal_fetch(url, { headers, method, body }).catch(
             FetchErrorWrapper,
         );
@@ -70,7 +70,7 @@ const json =
         base({
             body: (options.stringify ?? JSON.stringify)(options.body),
             method,
-            format: "application/json; charset=utf-8",
+            content_type: "application/json; charset=utf-8",
         })(options);
 
 const text =
@@ -81,7 +81,7 @@ const text =
         base({
             body: options.body.toString(),
             method,
-            format: `${options.format ?? "text/plain"}; charset=utf-8`,
+            content_type: options.content_type ?? "text/plain; charset=utf-8",
         })(options);
 
 const binary =
@@ -92,7 +92,7 @@ const binary =
         base({
             body: options.body,
             method,
-            format: options.format ?? "application/octet-stream",
+            content_type: options.content_type ?? "application/octet-stream",
         })(options);
 
 const formdata =
@@ -123,7 +123,7 @@ const formdata =
                 return body;
             })(),
             method,
-            format: "multipart/form-data; charset=utf-8",
+            content_type: "multipart/form-data; charset=utf-8",
         })(options);
 
 const urlencoded =
@@ -137,7 +137,7 @@ const urlencoded =
                     ? options.body
                     : new URLSearchParams(parseQueryValueList(options.body)),
             method,
-            format: "application/x-www-form-urlencoded; charset=utf-8",
+            content_type: "application/x-www-form-urlencoded; charset=utf-8",
         })(options);
 
 const fetch_with_body = (method: "POST" | "PATCH" | "PUT") =>

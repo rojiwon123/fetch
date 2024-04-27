@@ -24,7 +24,7 @@ export interface ITextBodyOptions<
     /**
      * @default text/plain
      */
-    format?: `text/${string}`;
+    content_type?: `text/${string}`;
     body: T;
 }
 
@@ -33,7 +33,7 @@ export interface IBinaryBodyOptions<T extends Blob | Uint8Array>
     /**
      * @default application/octet-stream
      */
-    format?: "application/octet-stream" | `video/${string}` | `image/${string}`;
+    content_type?: string;
     body: T;
 }
 

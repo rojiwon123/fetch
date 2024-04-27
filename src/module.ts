@@ -1,4 +1,4 @@
-export * from "./fetch";
+export * from "./method";
 
 export type * from "./formdata";
 export type * from "./headers";
