@@ -15,7 +15,7 @@
         "url": "https://github.com/rojiwon123/fetch.git"
     },
     "publishConfig": {
-        "registry": "https://npm.pkg.github.com"
+        "@rojiwon123/registry": "https://npm.pkg.github.com"
     },
     "author": "rojiwon123",
     "license": "MIT",
