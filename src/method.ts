@@ -102,6 +102,7 @@ const formdata =
     ): Promise<IResponse> =>
         base({
             body: ((): FormData => {
+                if (options.body instanceof FormData) return options.body;
                 const body = new FormData();
                 Object.entries(options.body).forEach(([key, value]) => {
                     if (value === undefined) return;
