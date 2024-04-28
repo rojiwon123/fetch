@@ -27,17 +27,14 @@ const server = app.listen(4000);
 const host = "http://localhost:4000";
 
 const start = (url: string) =>
-    test
-        .it("test start", { concurrency: true }, () =>
-            fetch.method.get({ url }).then(() => {}),
-        )
-        .then(() => url);
+    test.it("test start", { concurrency: true }, () =>
+        fetch.method.get({ url }).then(() => {}),
+    );
 
 const end = () =>
     server.close((err: unknown) => (err ? console.error(err) : null));
 
-void start(host)
-    .then(describe_json)
-    .then(describe_text)
+const execute = (...fns: ((url: string) => Promise<void>)[]) =>
+    Promise.all(fns.map((fn) => fn(host)));
 
-    .finally(end);
+void execute(start, describe_json, describe_text).finally(end);
