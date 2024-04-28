@@ -4,8 +4,8 @@ import express from "express";
 import test from "node:test";
 
 import fetch from "..";
-import { describe_json } from "./json";
-import { describe_text } from "./text";
+import { describe_json } from "./features/json";
+import { describe_text } from "./features/text";
 
 const app = express();
 

@@ -1,7 +1,7 @@
 import assert from "assert";
 import test from "node:test";
 
-import fetch from "..";
+import fetch from "../..";
 
 const json_body = {
     test: "test",

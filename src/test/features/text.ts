@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import test from "node:test";
 
-import fetch from "..";
+import fetch from "../..";
 
 const like_json = JSON.stringify({
     test: "test",
