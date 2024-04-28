@@ -65,10 +65,9 @@ const get = (options: IQueryOptions) =>
     base({
         path(origin) {
             const url = new URL(origin);
-            const query = parseQueryValueList(options.query);
-            url.searchParams.forEach(() => {
-                query;
-            });
+            parseQueryValueList(options.query).forEach(([key, value]) =>
+                url.searchParams.append(key, value),
+            );
             return url;
         },
         method: "GET",

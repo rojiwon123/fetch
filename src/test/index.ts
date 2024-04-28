@@ -5,6 +5,7 @@ import test from "node:test";
 
 import fetch from "..";
 import { describe_json } from "./features/json";
+import { describe_query } from "./features/query";
 import { describe_text } from "./features/text";
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(
 );
 
 app.get("/", (_, res) => res.end());
+app.get("/query", (req, res) => res.status(201).json(req.query));
 app.post("/json", (req, res) => res.status(201).json(req.body));
 app.post("/text", (req, res) => res.status(201).json(req.body));
 
@@ -37,4 +39,4 @@ const end = () =>
 const execute = (...fns: ((url: string) => Promise<void>)[]) =>
     Promise.all(fns.map((fn) => fn(host)));
 
-void execute(start, describe_json, describe_text).finally(end);
+void execute(start, describe_json, describe_text, describe_query).finally(end);
