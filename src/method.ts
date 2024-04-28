@@ -14,48 +14,62 @@ import {
 import { IQuery, parseQueryValueList } from "./query";
 import { IResponse } from "./response";
 
-const get_url = (url: string): URL => {
-    try {
-        const _url = new URL(url);
-        return _url;
-    } catch (error) {
-        throw new FetchError("Invalid URL", error);
-    }
-};
+const ErrorSyncWrapper =
+    <Args extends unknown[], R>(
+        message: FetchError["message"],
+        closure: (...args: Args) => R,
+    ) =>
+    (...args: Args) => {
+        try {
+            return closure(...args);
+        } catch (error) {
+            throw new FetchError(message, error);
+        }
+    };
 
-const FetchErrorWrapper = (...errors: unknown[]) => {
-    throw new FetchError("Fetch API Error", ...errors);
-};
+const ErrorAsyncWrapper =
+    <Args extends unknown[], R>(
+        message: FetchError["message"],
+        closure: (...args: Args) => Promise<R>,
+    ) =>
+    async (...args: Args) =>
+        closure(...args).catch((error) => {
+            throw new FetchError(message, error);
+        });
 
 const base =
     ({
-        path = (i) => i,
-        body = null,
+        path = (url: string): URL => new URL(url),
+        body = () => null,
         method,
         content_type,
     }: {
-        path?: (url: URL) => URL;
-        body?: string | Uint8Array | Blob | FormData | URLSearchParams | null;
+        path?: (url: string) => URL;
+        body?: () => BodyInit | null;
         method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
         content_type?: string;
     }) =>
     async (options: IOptions): Promise<IResponse> => {
-        const url = path(get_url(options.url));
+        const url = ErrorSyncWrapper("Invalid URL", path)(options.url);
         const headers = parseHeaders(options.headers);
-        if (content_type) headers.set("content-type", content_type);
-        return internal_fetch(url, { headers, method, body }).catch(
-            FetchErrorWrapper,
-        );
+        if (content_type !== undefined)
+            headers.set("content-type", content_type);
+        return ErrorAsyncWrapper("Fetch API Error", internal_fetch)(url, {
+            headers,
+            method,
+            body: ErrorSyncWrapper("Invalid Body", body)(),
+        });
     };
 
 const get = (options: IQueryOptions) =>
     base({
         path(origin) {
+            const url = new URL(origin);
             const query = parseQueryValueList(options.query);
-            origin.searchParams.forEach(() => {
+            url.searchParams.forEach(() => {
                 query;
             });
-            return origin;
+            return url;
         },
         method: "GET",
     })(options);
@@ -68,7 +82,7 @@ const json =
         options: IJsonBodyOptions<T>,
     ) =>
         base({
-            body: (options.stringify ?? JSON.stringify)(options.body),
+            body: () => (options.stringify ?? JSON.stringify)(options.body),
             method,
             content_type: "application/json; charset=utf-8",
         })(options);
@@ -79,7 +93,7 @@ const text =
         options: ITextBodyOptions<T>,
     ): Promise<IResponse> =>
         base({
-            body: options.body.toString(),
+            body: () => options.body.toString(),
             method,
             content_type: options.content_type ?? "text/plain; charset=utf-8",
         })(options);
@@ -90,7 +104,7 @@ const binary =
         options: IBinaryBodyOptions<T>,
     ): Promise<IResponse> =>
         base({
-            body: options.body,
+            body: () => options.body,
             method,
             content_type: options.content_type ?? "application/octet-stream",
         })(options);
@@ -101,7 +115,7 @@ const formdata =
         options: IFormDataBodyOptions<T>,
     ): Promise<IResponse> =>
         base({
-            body: ((): FormData => {
+            body: (): FormData => {
                 if (options.body instanceof FormData) return options.body;
                 const body = new FormData();
                 Object.entries(options.body).forEach(([key, value]) => {
@@ -122,7 +136,7 @@ const formdata =
                         });
                 });
                 return body;
-            })(),
+            },
             method,
             content_type: "multipart/form-data; charset=utf-8",
         })(options);
@@ -133,7 +147,7 @@ const urlencoded =
         options: IURLEncodedBodyOptions<T>,
     ): Promise<IResponse> =>
         base({
-            body:
+            body: () =>
                 options.body instanceof URLSearchParams
                     ? options.body
                     : new URLSearchParams(parseQueryValueList(options.body)),
