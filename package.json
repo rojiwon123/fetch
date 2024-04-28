@@ -1,6 +1,6 @@
 {
     "name": "@rojiwon123/fetch",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "description": "Fetch API wrapped around the original fetch function",
     "main": "lib/index.js",
     "scripts": {
