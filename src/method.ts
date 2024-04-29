@@ -1,6 +1,6 @@
 import { FetchError } from "./error";
 import { IFormData } from "./formdata";
-import { parseHeaders } from "./headers";
+import { toHeaders } from "./headers";
 import { internal_fetch } from "./internal_fetch";
 import {
     IBinaryBodyOptions,
@@ -13,29 +13,6 @@ import {
 } from "./options";
 import { IQuery, parseQueryValueList } from "./query";
 import { IResponse } from "./response";
-
-const ErrorSyncWrapper =
-    <Args extends unknown[], R>(
-        message: FetchError["message"],
-        closure: (...args: Args) => R,
-    ) =>
-    (...args: Args) => {
-        try {
-            return closure(...args);
-        } catch (error) {
-            throw new FetchError(message, error);
-        }
-    };
-
-const ErrorAsyncWrapper =
-    <Args extends unknown[], R>(
-        message: FetchError["message"],
-        closure: (...args: Args) => Promise<R>,
-    ) =>
-    async (...args: Args) =>
-        closure(...args).catch((error) => {
-            throw new FetchError(message, error);
-        });
 
 const base =
     ({
@@ -50,14 +27,14 @@ const base =
         content_type?: string;
     }) =>
     async (options: IOptions): Promise<IResponse> => {
-        const url = ErrorSyncWrapper("Invalid URL", path)(options.url);
-        const headers = parseHeaders(options.headers);
+        const url = FetchError.wrap("Invalid URL", path)(options.url);
+        const headers = toHeaders(options.headers);
         if (content_type !== undefined)
             headers.set("content-type", content_type);
-        return ErrorAsyncWrapper("Fetch API Error", internal_fetch)(url, {
+        return FetchError.wrap("Fetch API Error", internal_fetch)(url, {
             headers,
             method,
-            body: ErrorSyncWrapper("Invalid Body", body)(),
+            body: FetchError.wrap("Invalid Body", body)(),
         });
     };
 

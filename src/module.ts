@@ -6,3 +6,5 @@ export type * from "./options";
 export type * from "./query";
 export type * from "./response";
 export * from "./error";
+
+export * from "./response";

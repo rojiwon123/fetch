@@ -79,7 +79,7 @@ const isAllowList = (key: string) => BlockListKey[key] !== true;
 /**
  * @internal
  */
-export const parseHeaders = (headers: IHeaders | undefined): Headers => {
+export const toHeaders = (headers: IHeaders | undefined): Headers => {
     const result = new Headers();
     if (typeof headers !== "object" || headers === null) return result;
     Object.entries(headers).forEach(([key, value]) =>
@@ -96,4 +96,17 @@ export const parseHeaders = (headers: IHeaders | undefined): Headers => {
                 : null,
     );
     return result;
+};
+
+/**
+ * @internal
+ */
+export const fromHeaders = (headers: Headers): IHeaders => {
+    const list: [string, string | string[]][] = [];
+    headers.forEach((value, key) => {
+        if (BlockListKey[key]) list.push([key, value]);
+        const values = value.split(", ");
+        values.length > 1 ? list.push([key, values]) : list.push([key, value]);
+    });
+    return Object.fromEntries(list);
 };
