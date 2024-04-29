@@ -56,15 +56,13 @@ const json = <
     Status extends number,
 >(
     options: {
-        parser?: (input: string) => T;
         validator?: (input: T) => input is T;
         status?: Status;
     } = {},
 ) =>
     base({
         status: options.status,
-        parser: (res): Promise<T> =>
-            options.parser ? res.text().then(options.parser) : res.json(),
+        parser: (res) => res.json(),
         validator: options.validator,
         content_type: "application/json",
     });
