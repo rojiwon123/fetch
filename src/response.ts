@@ -11,7 +11,7 @@ export interface IFetchResponse<IBody, Status> {
 const base =
     <T, Status>(options: {
         status?: Status | Status[];
-        content_type: string;
+        content_type: string | null;
         parse: (res: IResponse) => Promise<unknown>;
         is?: (input: unknown) => input is T;
     }) =>
@@ -30,7 +30,10 @@ const base =
         const failyStatus = status === undefined && res.status >= 400;
         if (mismatchStatus || excludeStatus || failyStatus)
             throw new FetchError("Invalid Status", options);
-        if (!res.headers.get("content-type")?.startsWith(content_type))
+        if (
+            content_type !== null &&
+            !res.headers.get("content-type")?.startsWith(content_type)
+        )
             throw new FetchError(
                 "Invalid Response Body",
                 "response body content-type not matched.",
@@ -52,6 +55,13 @@ const base =
             body,
         };
     };
+
+const none = <Status extends number>(status: Status | Status[]) =>
+    base<null, Status>({
+        status,
+        content_type: null,
+        parse: (res) => res.text().then(() => null),
+    });
 
 const json = <
     T extends object | string | number | boolean | null,
@@ -88,6 +98,7 @@ const text = <T extends string, Status extends number>(
 // const stream = () => {};
 
 export const response = Object.freeze({
+    none,
     json,
     text,
 });
