@@ -1,107 +1,85 @@
-import { FetchError } from "./error";
 import { IHeaders, fromHeaders } from "./headers";
 
-export type IResponse = globalThis.Response;
-export interface IFetchResponse<IBody, Status> {
-    status: Status;
+export type IResponse =
+    | IDefaultResponse<"none", null>
+    | IDefaultResponse<"json", object | string | number | boolean | null>
+    | IDefaultResponse<"text", string>
+    | IDefaultResponse<"urlencoded", URLSearchParams>
+    | IDefaultResponse<"formdata", FormData>
+    | IDefaultResponse<"binary", Blob>
+    | IDefaultResponse<"stream", ReadableStream<Uint8Array>>;
+
+interface IDefaultResponse<
+    IFormat extends
+        | "none"
+        | "json"
+        | "text"
+        | "urlencoded"
+        | "formdata"
+        | "binary"
+        | "stream",
+    IBody extends
+        | object
+        | string
+        | number
+        | boolean
+        | null
+        | URLSearchParams
+        | ReadableStream<Uint8Array>
+        | Blob
+        | FormData,
+> {
+    status: number;
     headers: IHeaders;
+    format: IFormat;
     body: IBody;
 }
 
-const base =
-    <T, Status>(options: {
-        status?: Status | Status[];
-        content_type: string | null;
-        parse: (res: IResponse) => Promise<unknown>;
-        is?: (input: unknown) => input is T;
-    }) =>
-    async (res: IResponse): Promise<IFetchResponse<T, Status>> => {
-        const {
-            status,
-            content_type,
-            parse,
-            is = (input): input is T => {
-                input;
-                return true;
-            },
-        } = options;
-        const mismatchStatus =
-            typeof status === "number" && status !== res.status;
-        const excludeStatus =
-            Array.isArray(status) &&
-            !status.some((status) => status === res.status);
-        const failyStatus = status === undefined && res.status >= 400;
-        if (mismatchStatus || excludeStatus || failyStatus)
-            throw new FetchError("Invalid Status", options);
-        if (
-            content_type !== null &&
-            !res.headers.get("content-type")?.startsWith(content_type)
-        )
-            throw new FetchError(
-                "Invalid Response Body",
-                "response body content-type not matched.",
-                options,
-            );
-        const body = await FetchError.wrap(
-            "Invalid Response Body",
-            parse,
-            "fail to parse response body",
-        )(res);
-        if (!is(body))
-            throw new FetchError(
-                "Invalid Response Body",
-                "fail to validate response body",
-            );
-        return {
-            status: res.status as Status,
-            headers: fromHeaders(res.headers),
-            body,
-        };
-    };
+const mapResponse =
+    (status: number, headers: IHeaders) =>
+    <
+        T extends IResponse["format"],
+        R extends (IResponse & { format: T })["body"],
+    >(
+        format: T,
+        body: R,
+    ): IDefaultResponse<T, R> => ({ status, headers, format, body });
 
-const none = <Status extends number>(options: { status: Status | Status[] }) =>
-    base<null, Status>({
-        status: options.status,
-        content_type: null,
-        parse: (res) => res.text().then(() => null),
-    });
+/**
+ * @internal
+ */
+export const parseResponse = async (res: Response): Promise<IResponse> => {
+    const status = res.status;
+    const headers = fromHeaders(res.headers);
+    const content_type = res.headers.get("content-type");
+    const content_length = res.headers.get("content-length");
+    const map = mapResponse(status, headers);
+    if (content_length === null || content_length === "0")
+        return map("none", await res.text().then(() => null));
 
-const json = <
-    T extends object | string | number | boolean | null,
-    Status extends number,
->(
-    options: {
-        status?: Status;
-        is?: (input: unknown) => input is T;
-    } = {},
-) =>
-    base({
-        status: options.status,
-        content_type: "application/json",
-        parse: (res) => res.json(),
-        is: options.is,
-    });
-
-const text = <T extends string, Status extends number>(
-    options: {
-        status?: Status;
-        content_type?: `text/${string}`;
-        is?: (input: unknown) => input is T;
-    } = {},
-) =>
-    base({
-        status: options.status,
-        parse: (res) => res.text(),
-        is: options.is,
-        content_type: options.content_type ?? "text/plain",
-    });
-
-// const urlencoded = () => {};
-// const binary = () => {};
-// const stream = () => {};
-
-export const response = Object.freeze({
-    none,
-    json,
-    text,
-});
+    const stream = () =>
+        map(
+            "stream",
+            res.body ??
+                new ReadableStream<Uint8Array>({ start: (con) => con.close() }),
+        );
+    if (content_type === null) return stream();
+    if (content_type.startsWith("application/json"))
+        return map("json", await res.json());
+    if (content_type.startsWith("text/event-stream")) return stream();
+    if (content_type.startsWith("text/")) return map("text", await res.text());
+    if (content_type.startsWith("application/x-www-form-urlencoded"))
+        return map(
+            "urlencoded",
+            await res.text().then((text) => new URLSearchParams(text)),
+        );
+    if (content_type.startsWith("multipart/form-data"))
+        return map("formdata", await res.formData());
+    if (
+        content_type.startsWith("application/octet-stream") ||
+        content_type.startsWith("image/") ||
+        content_type.startsWith("video/")
+    )
+        return map("binary", await res.blob());
+    return stream();
+};

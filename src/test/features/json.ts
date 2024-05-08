@@ -1,8 +1,7 @@
-import assert from "assert";
 import test from "node:test";
 
-import fetch, { response } from "../..";
-import { fns } from "../util";
+import fetch from "../..";
+import { fns, validateWithoutHeaders } from "../util";
 
 const json_body = {
     test: "test",
@@ -29,10 +28,13 @@ const it =
         expected: object | string | number | boolean | null = actual,
     ) =>
         test.it(name, () =>
-            fetch.method.post
-                .json({ url: url + "/body", body: actual })
-                .then(response.json({ status: 201 }))
-                .then((res) => assert.deepStrictEqual(res.body, expected)),
+            fetch.method.post.json({ url: url + "/body", body: actual }).then(
+                validateWithoutHeaders({
+                    status: 201,
+                    format: "json",
+                    body: expected,
+                }),
+            ),
         );
 
 export const describe_json = (url: string) =>

@@ -12,7 +12,7 @@ import {
     IURLEncodedBodyOptions,
 } from "./options";
 import { IQuery, parseQueryValueList } from "./query";
-import { IResponse } from "./response";
+import { IResponse, parseResponse } from "./response";
 
 const base =
     ({
@@ -31,11 +31,20 @@ const base =
         const headers = toHeaders(options.headers);
         if (content_type !== undefined)
             headers.set("content-type", content_type);
-        return FetchError.wrap("Fetch API Error", internal_fetch)(url, {
+        const response = await FetchError.wrap(
+            "Fetch API Error",
+            internal_fetch,
+        )(url, {
             headers,
             method,
             body: FetchError.wrap("Invalid Body", body)(),
         });
+
+        return FetchError.wrap(
+            "Invalid Response Body",
+            parseResponse,
+            "fail to parse response body",
+        )(response);
     };
 
 const get = (options: IQueryOptions) =>

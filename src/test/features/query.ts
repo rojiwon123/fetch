@@ -1,17 +1,19 @@
-import assert from "assert";
 import test from "node:test";
 
-import fetch, { response } from "../..";
-import { fns } from "../util";
+import fetch from "../..";
+import { fns, validateWithoutHeaders } from "../util";
 
 const it =
     (url: string) =>
     (name: string, actual: fetch.IQuery, expected: fetch.IQuery = actual) =>
         test.it(name, () =>
-            fetch.method
-                .get({ url: url + "/query", query: actual })
-                .then(response.json({ status: 201 }))
-                .then((res) => assert.deepStrictEqual(res.body, expected)),
+            fetch.method.get({ url: url + "/query", query: actual }).then(
+                validateWithoutHeaders({
+                    status: 201,
+                    format: "json",
+                    body: expected,
+                }),
+            ),
         );
 
 export const describe_query = (url: string) =>
