@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import test from "node:test";
 
-import fetch, { IQuery } from "../..";
+import fetch, { IQuery, response } from "../..";
 import { fns } from "../util";
 
 const it =
@@ -13,50 +13,46 @@ const it =
     ) =>
         test.it(name, () =>
             fetch.method.post
-                .urlencoded({ url: host + "/urlencoded", body: actual })
-                .then(async (res) => {
-                    assert.strictEqual(res.status, 201);
-                    assert.deepStrictEqual(await res.json(), expected);
-                }),
+                .urlencoded({ url: host + "/body", body: actual })
+                .then(response.json({ status: 201 }))
+                .then((res) => assert.deepStrictEqual(res.body, expected)),
         );
 
 export const describe_urlencoded = (url: string) =>
-    test.describe("text test", { concurrency: true }, () =>
+    test.describe("urlencoded test", { concurrency: true }, () =>
         fns(it(url))(
+            ["str", { str: "str" }],
+            ["strs", { str: ["str1", "str2", "str3", "str4"] }],
+            ["num", { nums: 1 }, { nums: "1" }],
+            ["nums", { nums: [1, 2, 3, 4] }, { nums: ["1", "2", "3", "4"] }],
+            ["bool", { bool: true }, { bool: "true" }],
             [
-                "json body",
-                {
-                    test: "test",
-                    num: 123,
-                    bo: false,
-                    nums: [1, 2, 3, 4, "5"],
-                },
-                {
-                    test: "test",
-                    num: "123",
-                    bo: "false",
-                    nums: ["1", "2", "3", "4", "5"],
-                },
+                "bools",
+                { bool: [true, true, false] },
+                { bool: ["true", "true", "false"] },
+            ],
+            ["null", { nul: null }, { nul: "null" }],
+            [
+                "nulls",
+                { nul: [null, null, null] },
+                { nul: ["null", "null", "null"] },
             ],
             [
-                "param body",
-                (() => {
-                    const params = new URLSearchParams();
-                    params.append("test", "test");
-                    params.append("num", "123");
-                    params.append("bo", "false");
-                    params.append("nums", "1");
-                    params.append("nums", "2");
-                    params.append("nums", "3");
-                    params.append("nums", "4");
-                    params.append("nums", "5");
-                    return params;
-                })(),
+                "complex",
                 {
-                    test: "test",
+                    json: {
+                        num: 123,
+                    },
+                    list: ["str", 12, false, null, undefined],
+                    nums: [1, 2, 3, 4],
+                    num: 123,
+                    str: "1235",
+                } as any,
+                {
+                    list: ["str", "12", "false", "null"],
+                    nums: ["1", "2", "3", "4"],
                     num: "123",
-                    bo: "false",
-                    nums: ["1", "2", "3", "4", "5"],
+                    str: "1235",
                 },
             ],
         ),

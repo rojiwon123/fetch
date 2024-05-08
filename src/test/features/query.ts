@@ -1,7 +1,7 @@
 import assert from "assert";
 import test from "node:test";
 
-import fetch from "../..";
+import fetch, { response } from "../..";
 import { fns } from "../util";
 
 const it =
@@ -10,10 +10,8 @@ const it =
         test.it(name, () =>
             fetch.method
                 .get({ url: url + "/query", query: actual })
-                .then(async (res) => {
-                    assert.strictEqual(res.status, 201);
-                    assert.deepStrictEqual(await res.json(), expected);
-                }),
+                .then(response.json({ status: 201 }))
+                .then((res) => assert.deepStrictEqual(res.body, expected)),
         );
 
 export const describe_query = (url: string) =>

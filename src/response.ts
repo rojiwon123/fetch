@@ -20,7 +20,10 @@ const base =
             status,
             content_type,
             parse,
-            is = (input): input is T => true,
+            is = (input): input is T => {
+                input;
+                return true;
+            },
         } = options;
         const mismatchStatus =
             typeof status === "number" && status !== res.status;
@@ -56,9 +59,9 @@ const base =
         };
     };
 
-const none = <Status extends number>(status: Status | Status[]) =>
+const none = <Status extends number>(options: { status: Status | Status[] }) =>
     base<null, Status>({
-        status,
+        status: options.status,
         content_type: null,
         parse: (res) => res.text().then(() => null),
     });
