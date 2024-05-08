@@ -19,10 +19,17 @@ import fetch from "@rojiwon123/fetch";
 
 void fetch.method
     .get({ url: "http://localhost:3000" })
-    .then(async (res) => console.log(res.status, await res.text()));
+    .then(
+        fetch.response.text({
+            status: 200,
+            is: (input) => input === "success",
+        }),
+    )
+    .then(console.log);
 
 // request headers content-type value is `application/json; charset=utf-8`
 void fetch.method.post
     .json({ url: "http://localhost:3000", body: { test: "test" } })
-    .then(async (res) => console.log(res.status, await res.text()));
+    .then(fetch.response.json({ status: 201 }))
+    .then(console.log);
 ```
