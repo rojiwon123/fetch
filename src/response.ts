@@ -9,25 +9,27 @@ export type IResponse =
     | IDefaultResponse<"binary", Blob>
     | IDefaultResponse<"stream", ReadableStream<Uint8Array>>;
 
+export type IResponseBodyFormat =
+    | "none"
+    | "json"
+    | "text"
+    | "urlencoded"
+    | "formdata"
+    | "binary"
+    | "stream";
+export type IResponseBody =
+    | object
+    | string
+    | number
+    | boolean
+    | null
+    | URLSearchParams
+    | ReadableStream<Uint8Array>
+    | Blob
+    | FormData;
 interface IDefaultResponse<
-    IFormat extends
-        | "none"
-        | "json"
-        | "text"
-        | "urlencoded"
-        | "formdata"
-        | "binary"
-        | "stream",
-    IBody extends
-        | object
-        | string
-        | number
-        | boolean
-        | null
-        | URLSearchParams
-        | ReadableStream<Uint8Array>
-        | Blob
-        | FormData,
+    IFormat extends IResponseBodyFormat,
+    IBody extends IResponseBody,
 > {
     status: number;
     headers: IHeaders;
@@ -48,7 +50,7 @@ const mapResponse =
 /**
  * @internal
  */
-export const parseResponse = async (res: Response): Promise<IResponse> => {
+export const _parseResponse = async (res: Response): Promise<IResponse> => {
     const status = res.status;
     const headers = fromHeaders(res.headers);
     const content_type = res.headers.get("content-type");
@@ -83,3 +85,16 @@ export const parseResponse = async (res: Response): Promise<IResponse> => {
         return map("binary", await res.blob());
     return stream();
 };
+
+export const parseResponse =
+    <T extends IResponse, R = T["body"]>(options: {
+        status: number;
+        format: T["format"];
+        parser?: (input: T["body"]) => R;
+    }) =>
+    (res: IResponse): R => {
+        if (options.status !== res.status) throw Error();
+        if (options.format !== res.format) throw Error();
+        const parser = options.parser ?? ((input) => input as R);
+        return parser(res.body);
+    };
