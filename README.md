@@ -19,17 +19,12 @@ import fetch from "@rojiwon123/fetch";
 
 void fetch.method
     .get({ url: "http://localhost:3000" })
-    .then(
-        fetch.response.text({
-            status: 200,
-            is: (input) => input === "success",
-        }),
-    )
+    .then(fetch.response.match({ 200: fetch.response.none() }))
     .then(console.log);
 
 // request headers content-type value is `application/json; charset=utf-8`
 void fetch.method.post
     .json({ url: "http://localhost:3000", body: { test: "test" } })
-    .then(fetch.response.json({ status: 201 }))
+    .then(fetch.response.match({ 201: fetch.response.json((i) => i) }))
     .then(console.log);
 ```
