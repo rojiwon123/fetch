@@ -1,7 +1,7 @@
 import test from "node:test";
 
 import fetch from "../..";
-import { fns, validateWithoutHeaders } from "../util";
+import { assert, fns } from "../util";
 
 const like_json = JSON.stringify({
     test: "test",
@@ -18,13 +18,10 @@ const it =
         expected: string | number | boolean = actual,
     ) =>
         test.it(name, () =>
-            fetch.method.post.text({ url: host + "/body", body: actual }).then(
-                validateWithoutHeaders({
-                    status: 201,
-                    format: "json",
-                    body: expected,
-                }),
-            ),
+            fetch.method.post
+                .text({ url: host + "/body", body: actual })
+                .then(fetch.responseBody({ status: 201, type: "json" }))
+                .then(assert(expected)),
         );
 
 export const describe_text = (url: string) =>

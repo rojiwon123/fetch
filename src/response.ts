@@ -2,51 +2,49 @@ import { FetchError } from "./error";
 import { IHeaders, fromHeaders } from "./headers";
 
 export type IResponse =
-    | IDefaultResponse<"none", null>
-    | IDefaultResponse<"json", object | string | number | boolean | null>
-    | IDefaultResponse<"text", string>
-    | IDefaultResponse<"urlencoded", URLSearchParams>
-    | IDefaultResponse<"formdata", FormData>
-    | IDefaultResponse<"binary", Blob>
-    | IDefaultResponse<"stream", ReadableStream<Uint8Array>>;
+    | IResponse.IBase<"none", null>
+    | IResponse.IBase<"json", object | string | number | boolean | null>
+    | IResponse.IBase<"text", string>
+    | IResponse.IBase<"urlencoded", URLSearchParams>
+    | IResponse.IBase<"formdata", FormData>
+    | IResponse.IBase<"binary", Blob>
+    | IResponse.IBase<"stream", ReadableStream<Uint8Array>>;
 
-export type IResponseBodyFormat =
-    | "none"
-    | "json"
-    | "text"
-    | "urlencoded"
-    | "formdata"
-    | "binary"
-    | "stream";
-export type IResponseBody =
-    | object
-    | string
-    | number
-    | boolean
-    | null
-    | URLSearchParams
-    | ReadableStream<Uint8Array>
-    | Blob
-    | FormData;
-interface IDefaultResponse<
-    IFormat extends IResponseBodyFormat,
-    IBody extends IResponseBody,
-> {
-    status: number;
-    headers: IHeaders;
-    format: IFormat;
-    body: IBody;
+export namespace IResponse {
+    export type BodyType =
+        | "none"
+        | "json"
+        | "text"
+        | "urlencoded"
+        | "formdata"
+        | "binary"
+        | "stream";
+
+    export type IBody =
+        | object
+        | string
+        | number
+        | boolean
+        | null
+        | URLSearchParams
+        | ReadableStream<Uint8Array>
+        | Blob
+        | FormData;
+
+    export interface IBase<Type extends BodyType, Body extends IBody> {
+        status: number;
+        headers: IHeaders;
+        type: Type;
+        body: Body;
+    }
 }
 
 const mapResponse =
     (status: number, headers: IHeaders) =>
-    <
-        T extends IResponse["format"],
-        R extends (IResponse & { format: T })["body"],
-    >(
-        format: T,
+    <T extends IResponse["type"], R extends (IResponse & { type: T })["body"]>(
+        type: T,
         body: R,
-    ): IDefaultResponse<T, R> => ({ status, headers, format, body });
+    ): IResponse.IBase<T, R> => ({ status, headers, type, body });
 
 /**
  * @internal
@@ -87,22 +85,23 @@ export const parseResponse = async (res: Response): Promise<IResponse> => {
     return stream();
 };
 
+type IBody<T extends IResponse.IBody> = (IResponse & { format: T })["body"];
 export const responseBody =
-    <T extends IResponse, R = T["body"]>(options: {
+    <T extends IResponse.BodyType, R = IBody<T>>(options: {
         status: number;
-        format: T["format"];
-        parser?: (input: T["body"]) => R;
+        type: T;
+        parser?: (input: IBody<T>) => R;
     }) =>
     (res: IResponse): R => {
         if (options.status !== res.status)
             throw new FetchError("Invalid Status", options, res);
-        if (options.format !== res.format)
+        if (options.type !== res.type)
             throw new FetchError("Invalid Response Body", options, res);
-        const parser = options.parser ?? ((input) => input as R);
+        const parser = options.parser ?? ((input) => input as unknown as R);
         return FetchError.wrap(
             "Invalid Response Body",
             parser,
-            options,
+            "fail to parse response body",
             res,
-        )(res.body);
+        )(res.body as any);
     };

@@ -1,7 +1,7 @@
 import test from "node:test";
 
 import fetch from "../..";
-import { fns, validateWithoutHeaders } from "../util";
+import { assert, fns } from "../util";
 
 const json = {
     test: "test",
@@ -20,13 +20,8 @@ const it =
         test.it(name, () =>
             fetch.method.post
                 .json({ url: url + "/text-response", body: actual })
-                .then(
-                    validateWithoutHeaders({
-                        status: 201,
-                        format: "text",
-                        body: expected,
-                    }),
-                ),
+                .then(fetch.responseBody({ status: 201, type: "text" }))
+                .then(assert(expected)),
         );
 
 export const describe_text_response = (url: string) =>

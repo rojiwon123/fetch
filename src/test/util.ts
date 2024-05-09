@@ -1,4 +1,4 @@
-import assert from "node:assert";
+import _assert from "node:assert";
 
 import fetch from "..";
 
@@ -7,15 +7,6 @@ export const fns =
     (...parameters: Args[]) =>
         Promise.all(parameters.map((args) => fn(...args))).then(() => {});
 
-export const validateWithoutHeaders =
-    (expected: Omit<fetch.IResponse, "headers">) =>
-    (actual: fetch.IResponse) => {
-        assert.deepStrictEqual(
-            { status: actual.status, format: actual.format, body: actual.body },
-            {
-                status: expected.status,
-                format: expected.format,
-                body: expected.body,
-            },
-        );
-    };
+export const assert =
+    (expected: fetch.IResponse.IBody) => (actual: fetch.IResponse.IBody) =>
+        _assert.deepStrictEqual(actual, expected);

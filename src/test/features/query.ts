@@ -1,19 +1,16 @@
 import test from "node:test";
 
 import fetch from "../..";
-import { fns, validateWithoutHeaders } from "../util";
+import { assert, fns } from "../util";
 
 const it =
     (url: string) =>
     (name: string, actual: fetch.IQuery, expected: fetch.IQuery = actual) =>
         test.it(name, () =>
-            fetch.method.get({ url: url + "/query", query: actual }).then(
-                validateWithoutHeaders({
-                    status: 201,
-                    format: "json",
-                    body: expected,
-                }),
-            ),
+            fetch.method
+                .get({ url: url + "/query", query: actual })
+                .then(fetch.responseBody({ status: 201, type: "json" }))
+                .then(assert(expected)),
         );
 
 export const describe_query = (url: string) =>

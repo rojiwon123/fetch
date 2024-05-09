@@ -7,4 +7,4 @@ export type * from "./query";
 export type * from "./response";
 export * from "./error";
 
-export * from "./response";
+export { responseBody } from "./response";

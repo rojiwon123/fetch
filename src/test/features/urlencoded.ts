@@ -1,7 +1,7 @@
 import test from "node:test";
 
 import fetch from "../..";
-import { fns, validateWithoutHeaders } from "../util";
+import { assert, fns } from "../util";
 
 const it =
     (host: string) =>
@@ -13,13 +13,8 @@ const it =
         test.it(name, () =>
             fetch.method.post
                 .urlencoded({ url: host + "/body", body: actual })
-                .then(
-                    validateWithoutHeaders({
-                        status: 201,
-                        format: "json",
-                        body: expected,
-                    }),
-                ),
+                .then(fetch.responseBody({ status: 201, type: "json" }))
+                .then(assert(expected)),
         );
 
 export const describe_urlencoded = (url: string) =>

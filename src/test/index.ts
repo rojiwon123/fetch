@@ -9,7 +9,7 @@ import { describe_query } from "./features/query";
 import { describe_text } from "./features/text";
 import { describe_text_response } from "./features/text_response";
 import { describe_urlencoded } from "./features/urlencoded";
-import { validateWithoutHeaders } from "./util";
+import { assert } from "./util";
 
 const app = express();
 
@@ -64,13 +64,15 @@ const host = "http://localhost:4000";
 
 const start = (url: string) =>
     test.it("test start", { concurrency: true }, () =>
-        fetch.method.get({ url }).then(
-            validateWithoutHeaders({
-                status: 201,
-                format: "none",
-                body: null,
-            }),
-        ),
+        fetch.method
+            .get({ url })
+            .then(
+                fetch.responseBody({
+                    status: 201,
+                    type: "none",
+                }),
+            )
+            .then(assert(null)),
     );
 
 const end = () =>
