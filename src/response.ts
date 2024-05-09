@@ -1,3 +1,4 @@
+import { FetchError } from "./error";
 import { IHeaders, fromHeaders } from "./headers";
 
 export type IResponse =
@@ -50,7 +51,7 @@ const mapResponse =
 /**
  * @internal
  */
-export const _parseResponse = async (res: Response): Promise<IResponse> => {
+export const parseResponse = async (res: Response): Promise<IResponse> => {
     const status = res.status;
     const headers = fromHeaders(res.headers);
     const content_type = res.headers.get("content-type");
@@ -86,15 +87,22 @@ export const _parseResponse = async (res: Response): Promise<IResponse> => {
     return stream();
 };
 
-export const parseResponse =
+export const responseBody =
     <T extends IResponse, R = T["body"]>(options: {
         status: number;
         format: T["format"];
         parser?: (input: T["body"]) => R;
     }) =>
     (res: IResponse): R => {
-        if (options.status !== res.status) throw Error();
-        if (options.format !== res.format) throw Error();
+        if (options.status !== res.status)
+            throw new FetchError("Invalid Status", options, res);
+        if (options.format !== res.format)
+            throw new FetchError("Invalid Response Body", options, res);
         const parser = options.parser ?? ((input) => input as R);
-        return parser(res.body);
+        return FetchError.wrap(
+            "Invalid Response Body",
+            parser,
+            options,
+            res,
+        )(res.body);
     };

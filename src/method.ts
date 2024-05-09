@@ -12,7 +12,7 @@ import {
     IURLEncodedBodyOptions,
 } from "./options";
 import { IQuery, parseQueryValueList } from "./query";
-import { IResponse, _parseResponse } from "./response";
+import { IResponse, parseResponse } from "./response";
 
 const base =
     ({
@@ -42,7 +42,7 @@ const base =
 
         return FetchError.wrap(
             "Invalid Response Body",
-            _parseResponse,
+            parseResponse,
             "fail to parse response body",
         )(response);
     };
