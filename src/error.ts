@@ -3,9 +3,9 @@ export class FetchError extends Error {
         public override readonly message:
             | "Invalid Body"
             | "Invalid URL"
-            | "Invalid Status"
             | "Invalid Response Body"
-            | "Fetch API Error",
+            | "Fetch API Error"
+            | "Reach Unhandled Response case",
         ...causes: unknown[]
     ) {
         super(message);

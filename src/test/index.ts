@@ -67,9 +67,8 @@ const start = (url: string) =>
         fetch.method
             .get({ url })
             .then(
-                fetch.responseBody({
-                    status: 201,
-                    type: "none",
+                fetch.response.match({
+                    201: fetch.response.none(),
                 }),
             )
             .then(assert(null)),
@@ -89,4 +88,3 @@ void execute(
     describe_urlencoded,
     describe_text_response,
 ).finally(end);
-[describe_text, describe_query, describe_urlencoded, describe_text_response];

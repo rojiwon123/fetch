@@ -13,7 +13,11 @@ const it =
         test.it(name, () =>
             fetch.method.post
                 .urlencoded({ url: host + "/body", body: actual })
-                .then(fetch.responseBody({ status: 201, type: "json" }))
+                .then(
+                    fetch.response.match({
+                        201: fetch.response.json((i) => i),
+                    }),
+                )
                 .then(assert(expected)),
         );
 

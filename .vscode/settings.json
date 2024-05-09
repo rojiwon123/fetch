@@ -5,7 +5,5 @@
     "typescript.preferences.autoImportFileExcludePatterns": [
         "./tbuild/**",
         "./lib/**"
-    ],
-    "typescript.inlayHints.functionLikeReturnTypes.enabled": true,
-    "typescript.inlayHints.parameterTypes.enabled": true
+    ]
 }

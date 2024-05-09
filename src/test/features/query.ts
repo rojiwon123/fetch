@@ -9,7 +9,11 @@ const it =
         test.it(name, () =>
             fetch.method
                 .get({ url: url + "/query", query: actual })
-                .then(fetch.responseBody({ status: 201, type: "json" }))
+                .then(
+                    fetch.response.match({
+                        201: fetch.response.json((i) => i),
+                    }),
+                )
                 .then(assert(expected)),
         );
 

@@ -31,7 +31,7 @@ const base =
         const headers = toHeaders(options.headers);
         if (content_type !== undefined)
             headers.set("content-type", content_type);
-        const response = await FetchError.wrap(
+        const internal_fetch_response = await FetchError.wrap(
             "Fetch API Error",
             internal_fetch,
         )(url, {
@@ -44,7 +44,7 @@ const base =
             "Invalid Response Body",
             parseResponse,
             "fail to parse response body",
-        )(response);
+        )(internal_fetch_response);
     };
 
 const get = (options: IQueryOptions) =>

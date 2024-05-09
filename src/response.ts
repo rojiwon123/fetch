@@ -10,6 +10,10 @@ export type IResponse =
     | IResponse.IBase<"binary", Blob>
     | IResponse.IBase<"stream", ReadableStream<Uint8Array>>;
 
+type IBodyType<T extends IResponse.BodyType> = (IResponse & {
+    type: T;
+})["body"];
+
 export namespace IResponse {
     export type BodyType =
         | "none"
@@ -85,23 +89,47 @@ export const parseResponse = async (res: Response): Promise<IResponse> => {
     return stream();
 };
 
-type IBody<T extends IResponse.IBody> = (IResponse & { format: T })["body"];
-export const responseBody =
-    <T extends IResponse.BodyType, R = IBody<T>>(options: {
-        status: number;
-        type: T;
-        parser?: (input: IBody<T>) => R;
-    }) =>
-    (res: IResponse): R => {
-        if (options.status !== res.status)
-            throw new FetchError("Invalid Status", options, res);
-        if (options.type !== res.type)
-            throw new FetchError("Invalid Response Body", options, res);
-        const parser = options.parser ?? ((input) => input as unknown as R);
+const match =
+    <T>(options: Partial<Record<number | "_", (res: IResponse) => T>>) =>
+    (res: IResponse): T => {
+        const matched =
+            options[res.status] ??
+            options["_"] ??
+            (() => {
+                throw new FetchError(
+                    "Reach Unhandled Response case",
+                    options,
+                    res,
+                );
+            });
+        return matched(res);
+    };
+
+const base =
+    <T extends IResponse.BodyType>(type: T) =>
+    <R>(parser: (input: IBodyType<T>) => R) =>
+    (res: IResponse) => {
+        if (res.type !== type)
+            throw new FetchError(
+                "Invalid Response Body",
+                "response body is not promise type",
+                res,
+            );
         return FetchError.wrap(
             "Invalid Response Body",
             parser,
-            "fail to parse response body",
+            "fail to parse resposne body",
             res,
-        )(res.body as any);
+        )(res.body as IBodyType<T>);
     };
+
+export const response = Object.freeze({
+    match,
+    none: () => base("none")(() => null),
+    json: base("json"),
+    text: base("text"),
+    urlencoded: base("urlencoded"),
+    formdata: base("formdata"),
+    binary: base("binary"),
+    stream: base("stream"),
+});

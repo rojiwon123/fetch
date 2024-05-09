@@ -20,7 +20,11 @@ const it =
         test.it(name, () =>
             fetch.method.post
                 .json({ url: url + "/text-response", body: actual })
-                .then(fetch.responseBody({ status: 201, type: "text" }))
+                .then(
+                    fetch.response.match({
+                        201: fetch.response.text((i) => i),
+                    }),
+                )
                 .then(assert(expected)),
         );
 
