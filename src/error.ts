@@ -5,7 +5,7 @@ export class FetchError extends Error {
             | "Invalid URL"
             | "Invalid Response Body"
             | "Fetch API Error"
-            | "Reach Unhandled Response case",
+            | "Unexpected Resposne",
         ...causes: unknown[]
     ) {
         super(message);

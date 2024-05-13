@@ -89,18 +89,20 @@ export const parseResponse = async (res: Response): Promise<IResponse> => {
     return stream();
 };
 
+interface IMatchOptions<T> {
+    [status: number]: (res: IResponse) => T;
+    /** default match case */
+    _?: (res: IResponse) => T;
+}
+
 const match =
-    <T>(options: Partial<Record<number | "_", (res: IResponse) => T>>) =>
+    <T>(options: IMatchOptions<T>) =>
     (res: IResponse): T => {
         const matched =
             options[res.status] ??
             options["_"] ??
             (() => {
-                throw new FetchError(
-                    "Reach Unhandled Response case",
-                    options,
-                    res,
-                );
+                throw new FetchError("Unexpected Resposne", options, res);
             });
         return matched(res);
     };
