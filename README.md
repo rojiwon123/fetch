@@ -25,6 +25,11 @@ void fetch.method
 // request headers content-type value is `application/json; charset=utf-8`
 void fetch.method.post
     .json({ url: "http://localhost:3000", body: { test: "test" } })
-    .then(fetch.response.match({ 201: fetch.response.json((i) => i) }))
+    .then(
+        fetch.response.match({
+            201: fetch.response.json((i) => i), // status 201 case
+            _: fetch.response.text((i) => i), // default case
+        }),
+    )
     .then(console.log);
 ```
