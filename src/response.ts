@@ -89,22 +89,23 @@ export const parseResponse = async (res: Response): Promise<IResponse> => {
     return stream();
 };
 
-interface IMatchOptions<T> {
-    [status: number]: (res: IResponse) => T;
+interface IMatchOptions {
+    [status: number]: (res: IResponse) => unknown;
     /** default match case */
-    _?: (res: IResponse) => T;
+    _?: (res: IResponse) => unknown;
 }
+type ReturnType<T> = T extends (...args: unknown[]) => infer R ? R : never;
 
 const match =
-    <T>(options: IMatchOptions<T>) =>
-    (res: IResponse): T => {
+    <T extends IMatchOptions>(options: T) =>
+    (res: IResponse): ReturnType<T[keyof T]> => {
         const matched =
             options[res.status] ??
             options["_"] ??
             (() => {
                 throw new FetchError("Unexpected Resposne", options, res);
             });
-        return matched(res);
+        return matched(res) as ReturnType<T[keyof T]>;
     };
 
 const base =
