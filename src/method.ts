@@ -149,7 +149,7 @@ const fetch_with_body = (method: "POST" | "PATCH" | "PUT") =>
         urlencoded: urlencoded(method),
     });
 
-export const method = Object.freeze({
+export const request = Object.freeze({
     get,
     delete: _delete,
     post: fetch_with_body("POST"),

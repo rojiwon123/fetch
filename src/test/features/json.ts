@@ -28,7 +28,7 @@ const it =
         expected: object | string | number | boolean | null = actual,
     ) =>
         test.it(name, () =>
-            fetch.method.post
+            fetch.request.post
                 .json({ url: url + "/body", body: actual })
                 .then(
                     fetch.response.match({

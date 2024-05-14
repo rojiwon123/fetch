@@ -11,7 +11,7 @@ const it =
         expected: URLSearchParams | fetch.IQuery = actual,
     ) =>
         test.it(name, () =>
-            fetch.method.post
+            fetch.request.post
                 .urlencoded({ url: host + "/body", body: actual })
                 .then(
                     fetch.response.match({

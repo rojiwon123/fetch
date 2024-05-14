@@ -64,7 +64,7 @@ const host = "http://localhost:4000";
 
 const start = (url: string) =>
     test.it("test start", { concurrency: true }, () =>
-        fetch.method
+        fetch.request
             .get({ url })
             .then(
                 fetch.response.match({
