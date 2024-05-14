@@ -94,8 +94,7 @@ interface IMatchOptions {
     /** default match case */
     _?: (res: IResponse) => unknown;
 }
-type ReturnType<T> = T extends (...args: unknown[]) => infer R ? R : never;
-
+type ReturnType<T> = T extends (...args: any) => infer R ? R : never;
 const match =
     <T extends IMatchOptions>(options: T) =>
     (res: IResponse): ReturnType<T[keyof T]> => {
