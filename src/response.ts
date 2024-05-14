@@ -57,6 +57,7 @@ export const parseResponse = async (res: Response): Promise<IResponse> => {
     const status = res.status;
     const headers = fromHeaders(res.headers);
     const content_type = res.headers.get("content-type");
+    const content_length = res.headers.get("content-length");
     const map = mapResponse(status, headers);
     const stream = () =>
         map(
@@ -65,7 +66,8 @@ export const parseResponse = async (res: Response): Promise<IResponse> => {
                 new ReadableStream<Uint8Array>({ start: (con) => con.close() }),
         );
     if (content_type === null)
-        return map("none", await res.text().then(() => null));
+        if (content_length !== null && content_length !== "0") return stream();
+        else return map("none", await res.text().then(() => null));
     if (content_type.startsWith("application/json"))
         return map("json", await res.json());
     if (content_type.startsWith("text/event-stream")) return stream();
