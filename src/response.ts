@@ -57,11 +57,7 @@ export const parseResponse = async (res: Response): Promise<IResponse> => {
     const status = res.status;
     const headers = fromHeaders(res.headers);
     const content_type = res.headers.get("content-type");
-    const content_length = res.headers.get("content-length");
     const map = mapResponse(status, headers);
-    if (content_length === "0")
-        return map("none", await res.text().then(() => null));
-
     const stream = () =>
         map(
             "stream",
