@@ -65,9 +65,12 @@ export const parseResponse = async (res: Response): Promise<IResponse> => {
             res.body ??
                 new ReadableStream<Uint8Array>({ start: (con) => con.close() }),
         );
+
+    if (content_length === "0") return map("none", null);
+
     if (content_type === null)
-        if (content_length !== null && content_length !== "0") return stream();
-        else return map("none", await res.text().then(() => null));
+        return content_length === null ? map("none", null) : stream();
+
     if (content_type.startsWith("application/json"))
         return map("json", await res.json());
     if (content_type.startsWith("text/event-stream")) return stream();
