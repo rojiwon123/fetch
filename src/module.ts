@@ -1,10 +1,3 @@
-export * from "./method";
-
-export type * from "./formdata";
-export type * from "./headers";
-export type * from "./options";
-export type * from "./query";
-export type * from "./response";
-export * from "./error";
-
-export { response } from "./response";
+export type * from "./type";
+export * from "./request";
+export * from "./resposne";

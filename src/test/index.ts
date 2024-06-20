@@ -65,7 +65,7 @@ const host = "http://localhost:4000";
 const start = (url: string) =>
     test.it("test start", { concurrency: true }, () =>
         fetch.request
-            .get({ url })
+            .query({ url, method: "GET" })
             .then(
                 fetch.response.match({
                     201: fetch.response.none(),

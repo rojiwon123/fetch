@@ -18,8 +18,12 @@ const it =
         expected: object | string | number | boolean | null = actual,
     ) =>
         test.it(name, () =>
-            fetch.request.post
-                .json({ url: url + "/text-response", body: actual })
+            fetch.request
+                .json({
+                    url: url + "/text-response",
+                    body: actual,
+                    method: "POST",
+                })
                 .then(
                     fetch.response.match({
                         201: fetch.response.text((i) => i),

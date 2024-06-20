@@ -28,8 +28,8 @@ const it =
         expected: object | string | number | boolean | null = actual,
     ) =>
         test.it(name, () =>
-            fetch.request.post
-                .json({ url: url + "/body", body: actual })
+            fetch.request
+                .json({ url: url + "/body", body: actual, method: "POST" })
                 .then(
                     fetch.response.match({
                         201: fetch.response.json((i) => i),

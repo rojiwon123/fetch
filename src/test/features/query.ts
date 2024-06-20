@@ -8,7 +8,7 @@ const it =
     (name: string, actual: fetch.IQuery, expected: fetch.IQuery = actual) =>
         test.it(name, () =>
             fetch.request
-                .get({ url: url + "/query", query: actual })
+                .query({ url: url + "/query", query: actual, method: "GET" })
                 .then(
                     fetch.response.match({
                         201: fetch.response.json((i) => i),

@@ -1,7 +1,9 @@
-export type QueryValue = string | number | bigint | boolean | null;
-export type IQuery = Record<string, QueryValue | QueryValue[]>;
+import { IQuery, QueryValue } from "../type";
 
-const is_query_value = (input: unknown): input is QueryValue => {
+/**
+ * @internal
+ */
+export const is = (input: unknown): input is QueryValue => {
     if (input === null) return true;
     const type = typeof input;
     if (type === "string") return true;
@@ -14,19 +16,17 @@ const is_query_value = (input: unknown): input is QueryValue => {
 /**
  * @internal
  */
-export const parseQueryValueList = (
-    query: IQuery | undefined,
-): [string, string][] => {
+export const entries = (query?: IQuery): [string, string][] => {
     const list: [string, string][] = [];
-    if (typeof query !== "object" || query === null) return list;
+    if (query === undefined) return list;
     Object.entries(query).forEach(([key, value]) =>
         Array.isArray(value)
             ? value.forEach((item) =>
-                  is_query_value(item)
+                  is(item)
                       ? list.push([key, item?.toString() ?? "null"])
                       : null,
               )
-            : is_query_value(value)
+            : is(value)
               ? list.push([key, value?.toString() ?? "null"])
               : null,
     );

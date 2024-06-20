@@ -8,5 +8,5 @@ export const fns =
         Promise.all(parameters.map((args) => fn(...args))).then(() => {});
 
 export const assert =
-    (expected: fetch.IResponse.IBody) => (actual: fetch.IResponse.IBody) =>
+    (expected: fetch.IResponse["body"]) => (actual: fetch.IResponse["body"]) =>
         _assert.deepStrictEqual(actual, expected);
