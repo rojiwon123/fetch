@@ -36,6 +36,8 @@ export namespace Response {
 
         if (content_type.startsWith("application/json"))
             return response("json", await res.json());
+        if (content_type.startsWith("application/xml"))
+            return response("text", await res.text());
         if (content_type.startsWith("text/event-stream")) return stream();
         if (content_type.startsWith("text/"))
             return response("text", await res.text());
