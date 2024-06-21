@@ -17,19 +17,23 @@ npm i @rojiwon123/fetch
 ```typescript
 import fetch from "@rojiwon123/fetch";
 
-void fetch.method
-    .get({ url: "http://localhost:3000" })
+void fetch.request
+    .query({ url: "http://localhost:3000", method: "GET" })
     .then(fetch.response.match({ 200: fetch.response.none() }))
-    .then(console.log);
+    .then(console.log); // null
 
 // request headers content-type value is `application/json; charset=utf-8`
-void fetch.method.post
-    .json({ url: "http://localhost:3000", body: { test: "test" } })
+void fetch.request
+    .json({
+        url: "http://localhost:3000",
+        body: { test: "test" },
+        method: "POST",
+    })
     .then(
         fetch.response.match({
             201: fetch.response.json((i) => i), // status 201 case
             _: fetch.response.text((i) => i), // default case
         }),
     )
-    .then(console.log);
+    .then(console.log); // log response body
 ```
