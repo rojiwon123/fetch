@@ -1,9 +1,7 @@
 # build
 
-build
 tbuild
-lib
-dist
+package
 
 # Logs
 logs

@@ -1,6 +1,6 @@
+import fetch from "@rojiwon123/fetch";
 import test from "node:test";
 
-import fetch from "../..";
 import { assert, fns } from "../util";
 
 const json = {

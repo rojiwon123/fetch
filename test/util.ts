@@ -1,6 +1,5 @@
+import fetch from "@rojiwon123/fetch";
 import _assert from "node:assert";
-
-import fetch from "..";
 
 export const fns =
     <Args extends unknown[]>(fn: (...args: Args) => Promise<void>) =>

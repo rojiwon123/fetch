@@ -1,9 +1,9 @@
+import fetch from "@rojiwon123/fetch";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import express from "express";
 import test from "node:test";
 
-import fetch from "..";
 import { describe_json } from "./features/json";
 import { describe_query } from "./features/query";
 import { describe_text } from "./features/text";

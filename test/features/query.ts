@@ -1,22 +1,14 @@
+import fetch from "@rojiwon123/fetch";
 import test from "node:test";
 
-import fetch from "../..";
 import { assert, fns } from "../util";
 
 const it =
-    (host: string) =>
-    (
-        name: string,
-        actual: URLSearchParams | fetch.IQuery,
-        expected: URLSearchParams | fetch.IQuery = actual,
-    ) =>
+    (url: string) =>
+    (name: string, actual: fetch.IQuery, expected: fetch.IQuery = actual) =>
         test.it(name, () =>
             fetch.request
-                .urlencoded({
-                    url: host + "/body",
-                    body: actual,
-                    method: "POST",
-                })
+                .query({ url: url + "/query", query: actual, method: "GET" })
                 .then(
                     fetch.response.match({
                         201: fetch.response.json((i) => i),
@@ -25,8 +17,8 @@ const it =
                 .then(assert(expected)),
         );
 
-export const describe_urlencoded = (url: string) =>
-    test.describe("urlencoded test", { concurrency: true }, () =>
+export const describe_query = (url: string) =>
+    test.describe("query test", { concurrency: true }, () =>
         fns(it(url))(
             ["str", { str: "str" }],
             ["strs", { str: ["str1", "str2", "str3", "str4"] }],
